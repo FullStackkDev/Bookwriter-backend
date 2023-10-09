@@ -64,13 +64,14 @@ const registerUser = async (req, res) => {
       });
     }
 
-    const user = await User.create({
+    let user = await User.create({
       first_name,
       last_name,
       email,
       phone_no,
       password,
     });
+    user.password = undefined;
 
     return res.status(201).json({
       message: "User Registered Successfully",
