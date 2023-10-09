@@ -1,11 +1,50 @@
 // user authentication controller
 import User from "../models/userSchema.js";
 
-const getUser = async (req, res) => {
-  res.send("get user");
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(404).json({
+        message: "Please Fill all Fields",
+        success: false,
+      });
+    }
+
+    const user = await User.findOne({
+      email: email,
+    });
+    if (!user) {
+      res.status(404);
+      return res.json({
+        message: "User not found",
+        success: false,
+      });
+    }
+    if (!(await user.matchPassword(password))) {
+      res.status(404);
+      return res.json({
+        message: "Email or password is incorrect",
+        success: false,
+      });
+    }
+
+    res.json({
+      message: "User Signin Sucessfully",
+      success: true,
+      payload: {
+        _id: user._id,
+        name: `${user.first_name} ${user.last_name}`,
+        email: user.email,
+        token: user.generateToken(),
+      },
+    });
+  } catch (error) {
+    res.status(404).json({ message: error.message, success: false });
+  }
 };
 
-const createUser = async (req, res) => {
+const registerUser = async (req, res) => {
   try {
     const { first_name, last_name, email, password } = req.body;
 
@@ -28,7 +67,7 @@ const createUser = async (req, res) => {
     const user = await User.create({ first_name, last_name, email, password });
 
     return res.status(201).json({
-      message: "User Created Successfully",
+      message: "User Registered Successfully",
       payload: user,
       success: true,
     });
@@ -46,8 +85,8 @@ const deleteUser = async (req, res) => {
 };
 
 export default {
-  getUser,
-  createUser,
+  login,
+  registerUser,
   updateUser,
   deleteUser,
 };

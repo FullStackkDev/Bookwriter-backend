@@ -4,8 +4,8 @@ import user from "../controllers/user.js";
 
 const router = express.Router();
 
-router.get("/user", user.getUser);
-router.post("/user", user.createUser);
+router.post("/login", user.login);
+router.post("/register-user", user.registerUser);
 router.put("/user/:id", user.updateUser);
 router.delete("/user/:id", user.deleteUser);
 
