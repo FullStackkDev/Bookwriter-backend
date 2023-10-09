@@ -105,7 +105,46 @@ const getUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  res.send("update user");
+  try {
+    const { id } = req.params;
+    const { first_name, last_name, email, phone_no } = req.body;
+    if (!first_name || !last_name || !email || !phone_no) {
+      return res.status(404).json({
+        message: "Please Fill all Fields",
+        success: false,
+      });
+    }
+
+    if (req.body.password) {
+      return res.status(404).json({
+        message: "This route is not for password update.",
+        success: false,
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(id, {
+      first_name,
+      last_name,
+      email,
+      phone_no,
+    }).select("-password");
+    if (!updatedUser) {
+      return res.status(404).json({
+        message: "User Not Found",
+        success: false,
+      });
+    }
+    return res.status(201).json({
+      message: "User Updated Successfully",
+      payload: updatedUser,
+      success: true,
+    });
+  } catch (error) {
+    res.status(404).json({
+      message: error.message,
+      success: false,
+    });
+  }
 };
 
 const deleteUser = async (req, res) => {
