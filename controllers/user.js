@@ -102,7 +102,6 @@ const getUser = async (req, res) => {
   } catch (error) {
     res.status(404).json({ message: error.message, success: false });
   }
-  res.send("get specific user");
 };
 
 const updateUser = async (req, res) => {
@@ -110,7 +109,25 @@ const updateUser = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-  res.send("delete user");
+  try {
+    const { id } = req.params;
+
+    const deletedUser = await User.findByIdAndDelete(id).select("-password");
+    if (!deletedUser) {
+      return res.status(404).json({
+        message: "User Not Found",
+        success: false,
+      });
+    }
+
+    return res.status(200).json({
+      message: "User Deleted Successfully",
+      payload: deletedUser,
+      success: true,
+    });
+  } catch (error) {
+    res.status(404).json({ message: error.message, success: false });
+  }
 };
 
 export default {
