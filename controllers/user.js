@@ -76,6 +76,28 @@ const registerUser = async (req, res) => {
   }
 };
 
+const getUser = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.json({
+        message: "User Not Found",
+        success: false,
+      });
+    }
+
+    return res.status(200).json({
+      message: "User Fetched Successfully",
+      payload: user,
+      success: true,
+    });
+  } catch (error) {
+    res.status(404).json({ message: error.message, success: false });
+  }
+  res.send("get specific user");
+};
+
 const updateUser = async (req, res) => {
   res.send("update user");
 };
@@ -87,6 +109,7 @@ const deleteUser = async (req, res) => {
 export default {
   login,
   registerUser,
+  getUser,
   updateUser,
   deleteUser,
 };

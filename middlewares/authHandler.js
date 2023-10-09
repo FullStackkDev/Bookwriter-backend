@@ -3,6 +3,7 @@ import User from "../models/userSchema.js";
 import jwt from "jsonwebtoken";
 
 const Protected = async (req, res, next) => {
+  console.log("Enter in authentication file");
   let token;
   if (
     req.headers.authorization &&
