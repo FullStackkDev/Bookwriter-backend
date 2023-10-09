@@ -46,9 +46,9 @@ const login = async (req, res) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { first_name, last_name, email, password } = req.body;
+    const { first_name, last_name, email, phone_no, password } = req.body;
 
-    if (!first_name || !last_name || !email || !password) {
+    if (!first_name || !last_name || !email || !phone_no || !password) {
       return res.status(404).json({
         message: "Please Fill all Fields",
         success: false,
@@ -64,7 +64,13 @@ const registerUser = async (req, res) => {
       });
     }
 
-    const user = await User.create({ first_name, last_name, email, password });
+    const user = await User.create({
+      first_name,
+      last_name,
+      email,
+      phone_no,
+      password,
+    });
 
     return res.status(201).json({
       message: "User Registered Successfully",
