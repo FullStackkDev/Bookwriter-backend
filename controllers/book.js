@@ -1,8 +1,19 @@
 import Book from "../models/bookSchema.js";
 
 const getBook = async (req, res) => {
-  res.send("get book route");
+  try {
+    const books = await Book.find();
+
+    return res.status(200).json({
+      message: "Book Fetched Successfully",
+      payload: books,
+      success: true,
+    });
+  } catch (error) {
+    res.status(404).json({ message: error.message, success: false });
+  }
 };
+
 const createBook = async (req, res) => {
   try {
     const { title, image, description } = req.body;
@@ -14,6 +25,7 @@ const createBook = async (req, res) => {
     }
 
     const book = await Book.create({ title, image, description });
+
     return res.status(201).json({
       message: "Book Created Successfully",
       payload: book,
