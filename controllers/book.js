@@ -35,11 +35,33 @@ const createBook = async (req, res) => {
     res.status(404).json({ message: error.message, success: false });
   }
 };
+
 const updateBook = async (req, res) => {
   res.send("update book route");
 };
+
 const deleteBook = async (req, res) => {
-  res.send("delete book route");
+  try {
+    const { id } = req.params;
+    const book = await Book.findById(id);
+
+    if (!book) {
+      return res.status(404).json({
+        message: "Book Not Found",
+        success: false,
+      });
+    }
+
+    const deletedBook = await Book.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      message: "Book Deleted Successfully",
+      payload: deletedBook,
+      success: true,
+    });
+  } catch (error) {
+    res.status(404).json({ message: error.message, success: false });
+  }
 };
 
 export default {
