@@ -23,9 +23,10 @@ const userSchema = mongoose.Schema(
     },
     password: {
       type: String,
+      min: 8,
     },
     third_party_user_id: {
-      type: String,
+      type: Number,
     },
     third_party_type: {
       type: String,
