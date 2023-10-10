@@ -5,7 +5,7 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "Please Fill all Fields",
         success: false,
       });
@@ -15,13 +15,13 @@ const login = async (req, res) => {
       email: email,
     });
     if (!user) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "User not found",
         success: false,
       });
     }
     if (!(await user.matchPassword(password))) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "Email or password is incorrect",
         success: false,
       });
@@ -39,7 +39,7 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(404).json({ message: error.message, success: false });
+    res.status(200).json({ message: error.message, success: false });
   }
 };
 
@@ -48,7 +48,7 @@ const registerUser = async (req, res) => {
     const { first_name, last_name, email, phone_no, password } = req.body;
 
     if (!first_name || !last_name || !email || !phone_no || !password) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "Please Fill all Fields",
         success: false,
       });
@@ -57,7 +57,7 @@ const registerUser = async (req, res) => {
     //check if user already exist based on email
     const isUserExist = await User.findOne({ email });
     if (isUserExist) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "User Already Exist",
         success: false,
       });
@@ -78,7 +78,7 @@ const registerUser = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(404).json({ message: error.message, success: false });
+    res.status(200).json({ message: error.message, success: false });
   }
 };
 
@@ -99,7 +99,7 @@ const thirdPartyUserLogin = async (req, res) => {
       !third_party_user_id ||
       !third_party_type
     ) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "Required Data is missing",
         success: false,
       });
@@ -135,7 +135,7 @@ const thirdPartyUserLogin = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(404).json({ message: error.message, success: false });
+    res.status(200).json({ message: error.message, success: false });
   }
 };
 
@@ -156,7 +156,7 @@ const getUser = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(404).json({ message: error.message, success: false });
+    res.status(200).json({ message: error.message, success: false });
   }
 };
 
@@ -165,14 +165,14 @@ const updateUser = async (req, res) => {
     const { id } = req.params;
     const { first_name, last_name, email, phone_no } = req.body;
     if (!first_name || !last_name || !email || !phone_no) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "Please Fill all Fields",
         success: false,
       });
     }
 
     if (req.body.password) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "This route is not for password update.",
         success: false,
       });
@@ -189,7 +189,7 @@ const updateUser = async (req, res) => {
       { new: true }
     ).select("-password");
     if (!updatedUser) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "User Not Found",
         success: false,
       });
@@ -200,7 +200,7 @@ const updateUser = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(404).json({
+    res.status(200).json({
       message: error.message,
       success: false,
     });
@@ -213,7 +213,7 @@ const updateThirdPartyUser = async (req, res) => {
     const { first_name, last_name } = req.body;
 
     if (!first_name || !last_name) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "Required Fields are missing",
         success: false,
       });
@@ -228,7 +228,7 @@ const updateThirdPartyUser = async (req, res) => {
       { new: true }
     );
     if (!updatedThirdPartyUser) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "User Not Found",
         success: false,
       });
@@ -240,7 +240,7 @@ const updateThirdPartyUser = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(404).json({ message: error.message, success: false });
+    res.status(200).json({ message: error.message, success: false });
   }
 };
 
@@ -249,7 +249,7 @@ const updateUserPassword = async (req, res) => {
     const { id } = req.params;
     const { updated_password, current_password } = req.body;
     if (!updated_password || !current_password) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "Please Fill all Fields",
         success: false,
       });
@@ -258,13 +258,13 @@ const updateUserPassword = async (req, res) => {
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "User Not Found",
         success: false,
       });
     }
     if (!(await user.matchPassword(current_password))) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: `Your current password is wrong.`,
         success: false,
       });
@@ -278,7 +278,7 @@ const updateUserPassword = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(404).json({
+    res.status(200).json({
       message: error.message,
       success: false,
     });
@@ -291,7 +291,7 @@ const deleteUser = async (req, res) => {
 
     const deletedUser = await User.findByIdAndDelete(id).select("-password");
     if (!deletedUser) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "User Not Found",
         success: false,
       });
@@ -303,7 +303,7 @@ const deleteUser = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(404).json({ message: error.message, success: false });
+    res.status(200).json({ message: error.message, success: false });
   }
 };
 

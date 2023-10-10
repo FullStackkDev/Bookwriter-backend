@@ -10,7 +10,7 @@ const getBook = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(404).json({ message: error.message, success: false });
+    res.status(200).json({ message: error.message, success: false });
   }
 };
 
@@ -18,7 +18,7 @@ const createBook = async (req, res) => {
   try {
     const { title, image, description } = req.body;
     if (!title || !image || !description) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "Please Fill all Fields",
         success: false,
       });
@@ -32,7 +32,7 @@ const createBook = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(404).json({ message: error.message, success: false });
+    res.status(200).json({ message: error.message, success: false });
   }
 };
 
@@ -41,7 +41,7 @@ const updateBook = async (req, res) => {
     const { id } = req.params;
     const { title, image, description } = req.body;
     if (!title || !image || !description) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "Please Fill all Fields",
         success: false,
       });
@@ -52,7 +52,7 @@ const updateBook = async (req, res) => {
       runValidators: true,
     });
     if (!updatedBook) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "Book Not Found",
         success: false,
       });
@@ -64,7 +64,7 @@ const updateBook = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(404).json({
+    res.status(200).json({
       message: error.message,
       success: false,
     });
@@ -77,7 +77,7 @@ const deleteBook = async (req, res) => {
 
     const deletedBook = await Book.findByIdAndDelete(id);
     if (!deletedBook) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "Book Not Found",
         success: false,
       });
@@ -89,7 +89,7 @@ const deleteBook = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(404).json({ message: error.message, success: false });
+    res.status(200).json({ message: error.message, success: false });
   }
 };
 

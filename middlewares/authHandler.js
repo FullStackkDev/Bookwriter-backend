@@ -16,13 +16,13 @@ const Protected = async (req, res, next) => {
       req.user = user;
       next();
     } catch (error) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: error.message,
         success: false,
       });
     }
   } else {
-    return res.status(404).json({
+    return res.status(200).json({
       message: "Unauthorized",
       success: false,
     });
