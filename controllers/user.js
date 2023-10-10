@@ -83,56 +83,60 @@ const registerUser = async (req, res) => {
 };
 
 const thirdPartyUserLogin = async (req, res) => {
-  const {
-    first_name,
-    last_name,
-    email,
-    third_party_user_id,
-    third_party_type,
-  } = req.body;
+  try {
+    const {
+      first_name,
+      last_name,
+      email,
+      third_party_user_id,
+      third_party_type,
+    } = req.body;
 
-  if (
-    !first_name ||
-    !last_name ||
-    !email ||
-    !third_party_user_id ||
-    !third_party_type
-  ) {
-    return res.status(404).json({
-      message: "Required Data is missing",
-      success: false,
+    if (
+      !first_name ||
+      !last_name ||
+      !email ||
+      !third_party_user_id ||
+      !third_party_type
+    ) {
+      return res.status(404).json({
+        message: "Required Data is missing",
+        success: false,
+      });
+    }
+
+    //check if user already exist based on third_party_user_id
+    const isUserExist = await User.findOne({ third_party_user_id });
+    if (isUserExist) {
+      return res.status(200).json({
+        message: "User Already Exist",
+        success: true,
+        payload: {
+          _id: isUserExist._id,
+          first_name: isUserExist.first_name,
+          last_name: isUserExist.last_name,
+          email: isUserExist.email,
+          third_party_user_id,
+          token: isUserExist.generateToken(),
+        },
+      });
+    }
+
+    const user = await User.create({
+      first_name,
+      last_name,
+      email,
+      third_party_user_id,
+      third_party_type,
     });
-  }
-
-  //check if user already exist based on third_party_user_id
-  const isUserExist = await User.findOne({ third_party_user_id });
-  if (isUserExist) {
-    return res.status(200).json({
-      message: "User Already Exist",
+    return res.status(201).json({
+      message: "User Signin Successfully",
+      payload: { ...user._doc, token: user.generateToken() },
       success: true,
-      payload: {
-        _id: isUserExist._id,
-        first_name: isUserExist.first_name,
-        last_name: isUserExist.last_name,
-        email: isUserExist.email,
-        third_party_user_id,
-        token: isUserExist.generateToken(),
-      },
     });
+  } catch (error) {
+    res.status(404).json({ message: error.message, success: false });
   }
-
-  const user = await User.create({
-    first_name,
-    last_name,
-    email,
-    third_party_user_id,
-    third_party_type,
-  });
-  return res.status(201).json({
-    message: "User Signin Successfully",
-    payload: { ...user._doc, token: user.generateToken() },
-    success: true,
-  });
 };
 
 const getUser = async (req, res) => {
@@ -174,12 +178,16 @@ const updateUser = async (req, res) => {
       });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(id, {
-      first_name,
-      last_name,
-      email,
-      phone_no,
-    }).select("-password");
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      {
+        first_name,
+        last_name,
+        email,
+        phone_no,
+      },
+      { new: true }
+    ).select("-password");
     if (!updatedUser) {
       return res.status(404).json({
         message: "User Not Found",
@@ -196,6 +204,43 @@ const updateUser = async (req, res) => {
       message: error.message,
       success: false,
     });
+  }
+};
+
+const updateThirdPartyUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { first_name, last_name } = req.body;
+
+    if (!first_name || !last_name) {
+      return res.status(404).json({
+        message: "Required Fields are missing",
+        success: false,
+      });
+    }
+
+    const updatedThirdPartyUser = await User.findByIdAndUpdate(
+      id,
+      {
+        first_name,
+        last_name,
+      },
+      { new: true }
+    );
+    if (!updatedThirdPartyUser) {
+      return res.status(404).json({
+        message: "User Not Found",
+        success: false,
+      });
+    }
+
+    return res.status(201).json({
+      message: "User Updated Successfully",
+      payload: updatedThirdPartyUser,
+      success: true,
+    });
+  } catch (error) {
+    res.status(404).json({ message: error.message, success: false });
   }
 };
 
@@ -268,6 +313,7 @@ export default {
   thirdPartyUserLogin,
   getUser,
   updateUser,
+  updateThirdPartyUser,
   updateUserPassword,
   deleteUser,
 };
