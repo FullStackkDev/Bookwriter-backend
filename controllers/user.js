@@ -104,8 +104,8 @@ const thirdPartyUserLogin = async (req, res) => {
     });
   }
 
-  //check if user already exist based on email
-  const isUserExist = await User.findOne({ email });
+  //check if user already exist based on third_party_user_id
+  const isUserExist = await User.findOne({ third_party_user_id });
   if (isUserExist) {
     return res.status(200).json({
       message: "User Already Exist",
@@ -115,6 +115,7 @@ const thirdPartyUserLogin = async (req, res) => {
         first_name: isUserExist.first_name,
         last_name: isUserExist.last_name,
         email: isUserExist.email,
+        third_party_user_id,
         token: isUserExist.generateToken(),
       },
     });

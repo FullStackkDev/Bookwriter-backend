@@ -25,7 +25,7 @@ const userSchema = mongoose.Schema(
       type: String,
     },
     third_party_user_id: {
-      type: Boolean,
+      type: String,
     },
     third_party_type: {
       type: String,
