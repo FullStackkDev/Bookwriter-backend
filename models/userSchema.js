@@ -20,11 +20,15 @@ const userSchema = mongoose.Schema(
     },
     phone_no: {
       type: String,
-      required: true,
     },
     password: {
       type: String,
-      required: true,
+    },
+    is_third_party_user: {
+      type: Boolean,
+    },
+    third_party_type: {
+      type: String,
     },
   },
   {

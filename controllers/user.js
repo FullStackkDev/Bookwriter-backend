@@ -15,26 +15,25 @@ const login = async (req, res) => {
       email: email,
     });
     if (!user) {
-      res.status(404);
-      return res.json({
+      return res.status(404).json({
         message: "User not found",
         success: false,
       });
     }
     if (!(await user.matchPassword(password))) {
-      res.status(404);
-      return res.json({
+      return res.status(404).json({
         message: "Email or password is incorrect",
         success: false,
       });
     }
 
-    res.json({
+    return res.status(201).json({
       message: "User Signin Sucessfully",
       success: true,
       payload: {
         _id: user._id,
-        name: `${user.first_name} ${user.last_name}`,
+        first_name: user.first_name,
+        last_name: user.last_name,
         email: user.email,
         token: user.generateToken(),
       },
@@ -81,6 +80,58 @@ const registerUser = async (req, res) => {
   } catch (error) {
     res.status(404).json({ message: error.message, success: false });
   }
+};
+
+const thirdPartyUserLogin = async (req, res) => {
+  const {
+    first_name,
+    last_name,
+    email,
+    is_third_party_user,
+    third_party_type,
+  } = req.body;
+
+  if (
+    !first_name ||
+    !last_name ||
+    !email ||
+    !is_third_party_user ||
+    !third_party_type
+  ) {
+    return res.status(404).json({
+      message: "Required Data is missing",
+      success: false,
+    });
+  }
+
+  //check if user already exist based on email
+  const isUserExist = await User.findOne({ email });
+  if (isUserExist) {
+    return res.status(200).json({
+      message: "User Already Exist",
+      success: true,
+      payload: {
+        _id: isUserExist._id,
+        first_name: isUserExist.first_name,
+        last_name: isUserExist.last_name,
+        email: isUserExist.email,
+        token: isUserExist.generateToken(),
+      },
+    });
+  }
+
+  const user = await User.create({
+    first_name,
+    last_name,
+    email,
+    is_third_party_user,
+    third_party_type,
+  });
+  return res.status(201).json({
+    message: "User Signin Successfully",
+    payload: { ...user._doc, token: user.generateToken() },
+    success: true,
+  });
 };
 
 const getUser = async (req, res) => {
@@ -213,6 +264,7 @@ const deleteUser = async (req, res) => {
 export default {
   login,
   registerUser,
+  thirdPartyUserLogin,
   getUser,
   updateUser,
   updateUserPassword,
