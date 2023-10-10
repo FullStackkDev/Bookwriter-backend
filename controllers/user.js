@@ -147,6 +147,47 @@ const updateUser = async (req, res) => {
   }
 };
 
+const updateUserPassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { updated_password, current_password } = req.body;
+    if (!updated_password || !current_password) {
+      return res.status(404).json({
+        message: "Please Fill all Fields",
+        success: false,
+      });
+    }
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User Not Found",
+        success: false,
+      });
+    }
+    if (!(await user.matchPassword(current_password))) {
+      return res.status(404).json({
+        message: `Your current password is wrong.`,
+        success: false,
+      });
+    }
+
+    user.password = updated_password;
+    await user.save();
+
+    res.json({
+      message: "User Password Updated Successfully",
+      success: true,
+    });
+  } catch (error) {
+    res.status(404).json({
+      message: error.message,
+      success: false,
+    });
+  }
+};
+
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -174,5 +215,6 @@ export default {
   registerUser,
   getUser,
   updateUser,
+  updateUserPassword,
   deleteUser,
 };
