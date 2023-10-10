@@ -87,7 +87,7 @@ const thirdPartyUserLogin = async (req, res) => {
     first_name,
     last_name,
     email,
-    is_third_party_user,
+    third_party_user_id,
     third_party_type,
   } = req.body;
 
@@ -95,7 +95,7 @@ const thirdPartyUserLogin = async (req, res) => {
     !first_name ||
     !last_name ||
     !email ||
-    !is_third_party_user ||
+    !third_party_user_id ||
     !third_party_type
   ) {
     return res.status(404).json({
@@ -124,7 +124,7 @@ const thirdPartyUserLogin = async (req, res) => {
     first_name,
     last_name,
     email,
-    is_third_party_user,
+    third_party_user_id,
     third_party_type,
   });
   return res.status(201).json({

@@ -24,7 +24,7 @@ const userSchema = mongoose.Schema(
     password: {
       type: String,
     },
-    is_third_party_user: {
+    third_party_user_id: {
       type: Boolean,
     },
     third_party_type: {
