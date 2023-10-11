@@ -109,15 +109,16 @@ const thirdPartyUserLogin = async (req, res) => {
       third_party_type,
     } = req.body;
 
-    if (
-      !first_name ||
-      !last_name ||
-      !email ||
-      !third_party_user_id ||
-      !third_party_type
-    ) {
+    if (typeof third_party_user_id !== "number") {
       return res.status(200).json({
-        message: "Required Data is missing",
+        message: "ID must be a number",
+        success: false,
+      });
+    }
+
+    if (!third_party_type) {
+      return res.status(200).json({
+        message: "Third party type is missing",
         success: false,
       });
     }
@@ -137,6 +138,7 @@ const thirdPartyUserLogin = async (req, res) => {
           last_name: isUserExist.last_name,
           email: isUserExist.email,
           third_party_user_id,
+          third_party_type,
           token: isUserExist.generateToken(),
         },
       });
@@ -155,7 +157,18 @@ const thirdPartyUserLogin = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(200).json({ message: error.message, success: false });
+    let ValidationErrors = {};
+    if (error.name === "ValidationError" && Object.keys(error.errors).length) {
+      ValidationErrors = getUserValidationErrors(error);
+    }
+    res.status(200).json({
+      message: {
+        error: Object.keys(ValidationErrors).length
+          ? ValidationErrors
+          : error.message,
+      },
+      success: false,
+    });
   }
 };
 
