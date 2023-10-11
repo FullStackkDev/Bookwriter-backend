@@ -288,9 +288,16 @@ const updateUserPassword = async (req, res) => {
   try {
     const { id } = req.params;
     const { updated_password, current_password } = req.body;
-    if (!updated_password || !current_password) {
+
+    if (!passwordRegex.test(current_password)) {
       return res.status(200).json({
-        message: "Please Fill all Fields",
+        message: "Current password must be at least 8 characters long.",
+        success: false,
+      });
+    }
+    if (!passwordRegex.test(updated_password)) {
+      return res.status(200).json({
+        message: "Updated password must be at least 8 characters long.",
         success: false,
       });
     }
@@ -313,7 +320,7 @@ const updateUserPassword = async (req, res) => {
     user.password = updated_password;
     await user.save();
 
-    res.json({
+    res.status(200).json({
       message: "User Password Updated Successfully",
       success: true,
     });
