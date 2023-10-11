@@ -2,28 +2,62 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import validator from "validator";
+import {
+  nameRegularExpression,
+  phoneNumberRegularExpression,
+} from "../utils.js";
 
 const userSchema = mongoose.Schema(
   {
     first_name: {
       type: String,
-      required: true,
+      required: [true, "First name is required"],
+      trim: true,
+      minLength: [3, "First name must have at least 3 characters."],
+      validate: {
+        validator: (value) => {
+          return nameRegularExpression.test(value);
+        },
+        message: "First name does not include numbers.",
+      },
     },
     last_name: {
       type: String,
-      required: true,
+      required: [true, "Last name is required"],
+      trim: true,
+      minLength: [3, "Last name must have at least 3 characters."],
+      validate: {
+        validator: (value) => {
+          return nameRegularExpression.test(value);
+        },
+        message: "Last name does not include numbers.",
+      },
     },
     email: {
       type: String,
-      required: true,
-      unique: true,
+      required: [true, "Email is required"],
+      unique: [true, "Email already present"],
+      trim: true,
+      lowercase: true, // Convert email to lowercase
+      validate: {
+        validator: validator.isEmail,
+        message: "Invalid email address.",
+      },
     },
     phone_no: {
       type: String,
+      validate: {
+        validator: (value) => {
+          return phoneNumberRegularExpression.test(value);
+        },
+        message:
+          "Invalid phone number format. Please use the format: +xx-xxxxxxxxxx",
+      },
     },
     password: {
       type: String,
-      min: 8,
+      minLength: [8, "Password must be at least 8 characters long."],
     },
     third_party_user_id: {
       type: Number,
