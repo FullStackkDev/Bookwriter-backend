@@ -175,9 +175,10 @@ const thirdPartyUserLogin = async (req, res) => {
 const getUser = async (req, res) => {
   try {
     const userId = req.user._id;
-    const user = await User.findById(userId).select("-password");
+    let user = await GetUser("_id", userId);
+    user.password = undefined;
     if (!user) {
-      return res.json({
+      return res.status(200).json({
         message: "User Not Found",
         success: false,
       });
