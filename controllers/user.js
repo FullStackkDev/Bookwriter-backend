@@ -67,8 +67,7 @@ const registerUser = async (req, res) => {
         success: false,
       });
     }
-
-    let user = await User.create({
+    let user = await AddUser({
       first_name,
       last_name,
       email,
@@ -144,7 +143,7 @@ const thirdPartyUserLogin = async (req, res) => {
       });
     }
 
-    const user = await User.create({
+    const user = await AddUser({
       first_name,
       last_name,
       email,
@@ -205,17 +204,12 @@ const updateUser = async (req, res) => {
         success: false,
       });
     }
-
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      {
-        first_name,
-        last_name,
-        email,
-        phone_no,
-      },
-      { new: true, runValidators: true }
-    ).select("-password");
+    const updatedUser = await UpdateUser(id, {
+      first_name,
+      last_name,
+      email,
+      phone_no,
+    });
     if (!updatedUser) {
       return res.status(200).json({
         message: "User Not Found",
@@ -248,14 +242,10 @@ const updateThirdPartyUser = async (req, res) => {
     const { id } = req.params;
     const { first_name, last_name } = req.body;
 
-    const updatedThirdPartyUser = await User.findByIdAndUpdate(
-      id,
-      {
-        first_name,
-        last_name,
-      },
-      { new: true, runValidators: true }
-    );
+    const updatedThirdPartyUser = await UpdateUser(id, {
+      first_name,
+      last_name,
+    });
     if (!updatedThirdPartyUser) {
       return res.status(200).json({
         message: "User Not Found",
@@ -358,6 +348,15 @@ const GetUser = async (fieldName, value) => {
   const query = {};
   query[fieldName] = value;
   return await User.findOne(query);
+};
+const UpdateUser = async (id, updatedData) => {
+  return await User.findByIdAndUpdate(id, updatedData, {
+    new: true,
+    runValidators: true,
+  }).select("-password");
+};
+const AddUser = async (userData) => {
+  return await User.create(userData);
 };
 
 export default {
