@@ -248,20 +248,13 @@ const updateThirdPartyUser = async (req, res) => {
     const { id } = req.params;
     const { first_name, last_name } = req.body;
 
-    if (!first_name || !last_name) {
-      return res.status(200).json({
-        message: "Required Fields are missing",
-        success: false,
-      });
-    }
-
     const updatedThirdPartyUser = await User.findByIdAndUpdate(
       id,
       {
         first_name,
         last_name,
       },
-      { new: true }
+      { new: true, runValidators: true }
     );
     if (!updatedThirdPartyUser) {
       return res.status(200).json({
@@ -276,7 +269,18 @@ const updateThirdPartyUser = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(200).json({ message: error.message, success: false });
+    let ValidationErrors = {};
+    if (error.name === "ValidationError" && Object.keys(error.errors).length) {
+      ValidationErrors = getUserValidationErrors(error);
+    }
+    res.status(200).json({
+      message: {
+        error: Object.keys(ValidationErrors).length
+          ? ValidationErrors
+          : error.message,
+      },
+      success: false,
+    });
   }
 };
 
