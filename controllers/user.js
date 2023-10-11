@@ -198,12 +198,6 @@ const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const { first_name, last_name, email, phone_no } = req.body;
-    if (!first_name || !last_name || !email || !phone_no) {
-      return res.status(200).json({
-        message: "Please Fill all Fields",
-        success: false,
-      });
-    }
 
     if (req.body.password) {
       return res.status(200).json({
@@ -220,7 +214,7 @@ const updateUser = async (req, res) => {
         email,
         phone_no,
       },
-      { new: true }
+      { new: true, runValidators: true }
     ).select("-password");
     if (!updatedUser) {
       return res.status(200).json({
@@ -234,8 +228,16 @@ const updateUser = async (req, res) => {
       success: true,
     });
   } catch (error) {
+    let ValidationErrors = {};
+    if (error.name === "ValidationError" && Object.keys(error.errors).length) {
+      ValidationErrors = getUserValidationErrors(error);
+    }
     res.status(200).json({
-      message: error.message,
+      message: {
+        error: Object.keys(ValidationErrors).length
+          ? ValidationErrors
+          : error.message,
+      },
       success: false,
     });
   }
