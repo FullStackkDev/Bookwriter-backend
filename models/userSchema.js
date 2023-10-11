@@ -3,10 +3,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import validator from "validator";
-import {
-  nameRegularExpression,
-  phoneNumberRegularExpression,
-} from "../utils.js";
+import { nameRegex, phoneRegex } from "../utils.js";
 
 const userSchema = mongoose.Schema(
   {
@@ -17,7 +14,7 @@ const userSchema = mongoose.Schema(
       minLength: [3, "First name must have at least 3 characters."],
       validate: {
         validator: (value) => {
-          return nameRegularExpression.test(value);
+          return nameRegex.test(value);
         },
         message: "First name does not include numbers.",
       },
@@ -29,7 +26,7 @@ const userSchema = mongoose.Schema(
       minLength: [3, "Last name must have at least 3 characters."],
       validate: {
         validator: (value) => {
-          return nameRegularExpression.test(value);
+          return nameRegex.test(value);
         },
         message: "Last name does not include numbers.",
       },
@@ -49,7 +46,7 @@ const userSchema = mongoose.Schema(
       type: String,
       validate: {
         validator: (value) => {
-          return phoneNumberRegularExpression.test(value);
+          return phoneRegex.test(value);
         },
         message:
           "Invalid phone number format. Please use the format: +xx-xxxxxxxxxx",

@@ -1,25 +1,37 @@
 // user authentication controller
 import User from "../models/userSchema.js";
+import {
+  getUserValidationErrors,
+  emailRegex,
+  passwordRegex,
+} from "../utils.js";
 
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
+    if (!emailRegex.test(email)) {
       return res.status(200).json({
-        message: "Please Fill all Fields",
+        message: "Invalid email address.",
+        success: false,
+      });
+    }
+    if (!passwordRegex.test(password)) {
+      return res.status(200).json({
+        message: "Password must be at least 8 characters long.",
         success: false,
       });
     }
 
-    const user = await User.findOne({
-      email: email,
-    });
+    //check if user already exist based on email
+    const user = await GetUser("email", email);
+
     if (!user) {
       return res.status(200).json({
         message: "User not found",
         success: false,
       });
     }
+
     if (!(await user.matchPassword(password))) {
       return res.status(200).json({
         message: "Email or password is incorrect",
@@ -47,16 +59,9 @@ const registerUser = async (req, res) => {
   try {
     const { first_name, last_name, email, phone_no, password } = req.body;
 
-    if (!first_name || !last_name || !email || !phone_no || !password) {
-      return res.status(200).json({
-        message: "Please Fill all Fields",
-        success: false,
-      });
-    }
-
     //check if user already exist based on email
-    const isUserExist = await User.findOne({ email });
-    if (isUserExist) {
+    const UserExist = await GetUser("email", email);
+    if (UserExist) {
       return res.status(200).json({
         message: "User Already Exist",
         success: false,
@@ -78,7 +83,19 @@ const registerUser = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(200).json({ message: error.message, success: false });
+    let ValidationErrors = {};
+    if (error.name === "ValidationError" && Object.keys(error.errors).length) {
+      ValidationErrors = getUserValidationErrors(error);
+    }
+
+    res.status(200).json({
+      message: {
+        error: Object.keys(ValidationErrors).length
+          ? ValidationErrors
+          : error.message,
+      },
+      success: false,
+    });
   }
 };
 
@@ -106,7 +123,10 @@ const thirdPartyUserLogin = async (req, res) => {
     }
 
     //check if user already exist based on third_party_user_id
-    const isUserExist = await User.findOne({ third_party_user_id });
+    const isUserExist = await GetUser(
+      "third_party_user_id",
+      third_party_user_id
+    );
     if (isUserExist) {
       return res.status(200).json({
         message: "User Already Exist",
@@ -305,6 +325,12 @@ const deleteUser = async (req, res) => {
   } catch (error) {
     res.status(200).json({ message: error.message, success: false });
   }
+};
+
+const GetUser = async (fieldName, value) => {
+  const query = {};
+  query[fieldName] = value;
+  return await User.findOne(query);
 };
 
 export default {
