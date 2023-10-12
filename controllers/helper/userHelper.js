@@ -1,6 +1,107 @@
 import User from "../../models/userSchema.js";
 import { getUserValidationErrors } from "../../utils.js";
 
+export const create = async (userData) => {
+  try {
+    //For third party user registering
+    if ("third_party_user_id" in userData || "third_party_type" in userData) {
+      if (typeof userData.third_party_user_id !== "number") {
+        return {
+          status: 200,
+          payload: {
+            message: "ID must be a number",
+            success: false,
+          },
+        };
+      }
+
+      if (!userData.third_party_type) {
+        return {
+          status: 200,
+          payload: {
+            message: "Third party type is missing",
+            success: false,
+          },
+        };
+      }
+
+      //check if user already exist based on third_party_user_id
+      const userExist = await GetUser(
+        "third_party_user_id",
+        userData.third_party_user_id
+      );
+      if (userExist) {
+        return {
+          status: 200,
+          payload: {
+            message: "User Already Exist",
+            payload: {
+              _id: userExist._id,
+              first_name: userExist.first_name,
+              last_name: userExist.last_name,
+              email: userExist.email,
+              third_party_user_id: userExist.third_party_user_id,
+              third_party_type: userExist.third_party_type,
+              token: userExist.generateToken(),
+            },
+            success: true,
+          },
+        };
+      }
+      const user = await AddUser(userData);
+
+      return {
+        status: 200,
+        payload: {
+          message: "User Signin Successfully",
+          payload: { ...user._doc, token: user.generateToken() },
+          success: true,
+        },
+      };
+    }
+
+    //For simple user registering
+    //check if user already exist based on email
+    const userExist = await GetUser("email", userData.email);
+    if (userExist) {
+      return {
+        status: 200,
+        payload: {
+          message: "User Already Exist",
+          success: false,
+        },
+      };
+    }
+    let user = await AddUser(userData);
+    user.password = undefined;
+
+    return {
+      status: 200,
+      payload: {
+        message: "User Registered Successfully",
+        payload: user,
+        success: true,
+      },
+    };
+  } catch (error) {
+    let ValidationErrors = {};
+    if (error.name === "ValidationError" && Object.keys(error.errors).length) {
+      ValidationErrors = getUserValidationErrors(error);
+    }
+    return {
+      status: 200,
+      payload: {
+        message: {
+          error: Object.keys(ValidationErrors).length
+            ? ValidationErrors
+            : error.message,
+        },
+        success: false,
+      },
+    };
+  }
+};
+
 export const update = async (id, updatedData) => {
   try {
     if (
@@ -74,9 +175,19 @@ export const update = async (id, updatedData) => {
   }
 };
 
+const GetUser = async (fieldName, value) => {
+  const query = {};
+  query[fieldName] = value;
+  return await User.findOne(query);
+};
+
 const UpdateUser = async (id, updatedData) => {
   return await User.findByIdAndUpdate(id, updatedData, {
     new: true,
     runValidators: true,
   }).select("-password");
+};
+
+const AddUser = async (userData) => {
+  return await User.create(userData);
 };

@@ -1,6 +1,6 @@
 // user authentication controller
 import User from "../models/userSchema.js";
-import { update } from "./helper/userHelper.js";
+import { update, create } from "./helper/userHelper.js";
 import {
   getUserValidationErrors,
   emailRegex,
@@ -56,120 +56,9 @@ const login = async (req, res) => {
   }
 };
 
-const registerUser = async (req, res) => {
-  try {
-    const { first_name, last_name, email, phone_no, password } = req.body;
-
-    //check if user already exist based on email
-    const UserExist = await GetUser("email", email);
-    if (UserExist) {
-      return res.status(200).json({
-        message: "User Already Exist",
-        success: false,
-      });
-    }
-    let user = await AddUser({
-      first_name,
-      last_name,
-      email,
-      phone_no,
-      password,
-    });
-    user.password = undefined;
-
-    return res.status(201).json({
-      message: "User Registered Successfully",
-      payload: user,
-      success: true,
-    });
-  } catch (error) {
-    let ValidationErrors = {};
-    if (error.name === "ValidationError" && Object.keys(error.errors).length) {
-      ValidationErrors = getUserValidationErrors(error);
-    }
-
-    res.status(200).json({
-      message: {
-        error: Object.keys(ValidationErrors).length
-          ? ValidationErrors
-          : error.message,
-      },
-      success: false,
-    });
-  }
-};
-
-const thirdPartyUserLogin = async (req, res) => {
-  try {
-    const {
-      first_name,
-      last_name,
-      email,
-      third_party_user_id,
-      third_party_type,
-    } = req.body;
-
-    if (typeof third_party_user_id !== "number") {
-      return res.status(200).json({
-        message: "ID must be a number",
-        success: false,
-      });
-    }
-
-    if (!third_party_type) {
-      return res.status(200).json({
-        message: "Third party type is missing",
-        success: false,
-      });
-    }
-
-    //check if user already exist based on third_party_user_id
-    const isUserExist = await GetUser(
-      "third_party_user_id",
-      third_party_user_id
-    );
-    if (isUserExist) {
-      return res.status(200).json({
-        message: "User Already Exist",
-        success: true,
-        payload: {
-          _id: isUserExist._id,
-          first_name: isUserExist.first_name,
-          last_name: isUserExist.last_name,
-          email: isUserExist.email,
-          third_party_user_id,
-          third_party_type,
-          token: isUserExist.generateToken(),
-        },
-      });
-    }
-
-    const user = await AddUser({
-      first_name,
-      last_name,
-      email,
-      third_party_user_id,
-      third_party_type,
-    });
-    return res.status(201).json({
-      message: "User Signin Successfully",
-      payload: { ...user._doc, token: user.generateToken() },
-      success: true,
-    });
-  } catch (error) {
-    let ValidationErrors = {};
-    if (error.name === "ValidationError" && Object.keys(error.errors).length) {
-      ValidationErrors = getUserValidationErrors(error);
-    }
-    res.status(200).json({
-      message: {
-        error: Object.keys(ValidationErrors).length
-          ? ValidationErrors
-          : error.message,
-      },
-      success: false,
-    });
-  }
+const createUser = async (req, res) => {
+  const result = await create(req.body);
+  res.status(result.status).json(result.payload);
 };
 
 const getUser = async (req, res) => {
@@ -227,14 +116,9 @@ const GetUser = async (fieldName, value) => {
   return await User.findOne(query);
 };
 
-const AddUser = async (userData) => {
-  return await User.create(userData);
-};
-
 export default {
   login,
-  registerUser,
-  thirdPartyUserLogin,
+  createUser,
   getUser,
   updateUser,
   deleteUser,
