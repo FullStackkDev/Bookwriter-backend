@@ -175,6 +175,38 @@ export const update = async (id, updatedData) => {
   }
 };
 
+export const remove = async (id) => {
+  try {
+    const deletedUser = await User.findByIdAndDelete(id).select("-password");
+    if (!deletedUser) {
+      return {
+        status: 200,
+        payload: {
+          message: "User Not Found",
+          success: false,
+        },
+      };
+    }
+
+    return {
+      status: 200,
+      payload: {
+        message: "User Deleted Successfully",
+        payload: deletedUser,
+        success: true,
+      },
+    };
+  } catch (error) {
+    return {
+      status: 200,
+      payload: {
+        message: error.message,
+        success: false,
+      },
+    };
+  }
+};
+
 const GetUser = async (fieldName, value) => {
   const query = {};
   query[fieldName] = value;
