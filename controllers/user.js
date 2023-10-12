@@ -1,5 +1,6 @@
 // user authentication controller
 import User from "../models/userSchema.js";
+import { update } from "./helper/userHelper.js";
 import {
   getUserValidationErrors,
   emailRegex,
@@ -194,132 +195,7 @@ const getUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { first_name, last_name, email, phone_no } = req.body;
-
-    if (req.body.password) {
-      return res.status(200).json({
-        message: "This route is not for password update.",
-        success: false,
-      });
-    }
-    const updatedUser = await UpdateUser(id, {
-      first_name,
-      last_name,
-      email,
-      phone_no,
-    });
-    if (!updatedUser) {
-      return res.status(200).json({
-        message: "User Not Found",
-        success: false,
-      });
-    }
-    return res.status(201).json({
-      message: "User Updated Successfully",
-      payload: updatedUser,
-      success: true,
-    });
-  } catch (error) {
-    let ValidationErrors = {};
-    if (error.name === "ValidationError" && Object.keys(error.errors).length) {
-      ValidationErrors = getUserValidationErrors(error);
-    }
-    res.status(200).json({
-      message: {
-        error: Object.keys(ValidationErrors).length
-          ? ValidationErrors
-          : error.message,
-      },
-      success: false,
-    });
-  }
-};
-
-const updateThirdPartyUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { first_name, last_name } = req.body;
-
-    const updatedThirdPartyUser = await UpdateUser(id, {
-      first_name,
-      last_name,
-    });
-    if (!updatedThirdPartyUser) {
-      return res.status(200).json({
-        message: "User Not Found",
-        success: false,
-      });
-    }
-
-    return res.status(201).json({
-      message: "User Updated Successfully",
-      payload: updatedThirdPartyUser,
-      success: true,
-    });
-  } catch (error) {
-    let ValidationErrors = {};
-    if (error.name === "ValidationError" && Object.keys(error.errors).length) {
-      ValidationErrors = getUserValidationErrors(error);
-    }
-    res.status(200).json({
-      message: {
-        error: Object.keys(ValidationErrors).length
-          ? ValidationErrors
-          : error.message,
-      },
-      success: false,
-    });
-  }
-};
-
-const updateUserPassword = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { updated_password, current_password } = req.body;
-
-    if (!passwordRegex.test(current_password)) {
-      return res.status(200).json({
-        message: "Current password must be at least 8 characters long.",
-        success: false,
-      });
-    }
-    if (!passwordRegex.test(updated_password)) {
-      return res.status(200).json({
-        message: "Updated password must be at least 8 characters long.",
-        success: false,
-      });
-    }
-
-    const user = await User.findById(id);
-
-    if (!user) {
-      return res.status(200).json({
-        message: "User Not Found",
-        success: false,
-      });
-    }
-    if (!(await user.matchPassword(current_password))) {
-      return res.status(200).json({
-        message: `Your current password is wrong.`,
-        success: false,
-      });
-    }
-
-    user.password = updated_password;
-    await user.save();
-
-    res.status(200).json({
-      message: "User Password Updated Successfully",
-      success: true,
-    });
-  } catch (error) {
-    res.status(200).json({
-      message: error.message,
-      success: false,
-    });
-  }
+  update(req.params.id, req.body, res);
 };
 
 const deleteUser = async (req, res) => {
@@ -349,12 +225,7 @@ const GetUser = async (fieldName, value) => {
   query[fieldName] = value;
   return await User.findOne(query);
 };
-const UpdateUser = async (id, updatedData) => {
-  return await User.findByIdAndUpdate(id, updatedData, {
-    new: true,
-    runValidators: true,
-  }).select("-password");
-};
+
 const AddUser = async (userData) => {
   return await User.create(userData);
 };
@@ -365,7 +236,5 @@ export default {
   thirdPartyUserLogin,
   getUser,
   updateUser,
-  updateThirdPartyUser,
-  updateUserPassword,
   deleteUser,
 };
