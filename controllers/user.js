@@ -1,6 +1,6 @@
 // user authentication controller
 import User from "../models/userSchema.js";
-import { update, create, remove } from "./helper/userHelper.js";
+import { update, create, remove, fetchUser } from "./helper/userHelper.js";
 import { emailRegex, passwordRegex } from "../utils.js";
 
 const login = async (req, res) => {
@@ -58,25 +58,8 @@ const createUser = async (req, res) => {
 };
 
 const getUser = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    let user = await GetUser("_id", userId);
-    user.password = undefined;
-    if (!user) {
-      return res.status(200).json({
-        message: "User Not Found",
-        success: false,
-      });
-    }
-
-    return res.status(200).json({
-      message: "User Fetched Successfully",
-      payload: user,
-      success: true,
-    });
-  } catch (error) {
-    res.status(200).json({ message: error.message, success: false });
-  }
+  const result = await fetchUser(req.user._id);
+  res.status(result.status).json(result.payload);
 };
 
 const updateUser = async (req, res) => {

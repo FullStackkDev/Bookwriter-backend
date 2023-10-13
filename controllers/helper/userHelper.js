@@ -207,6 +207,39 @@ export const remove = async (id) => {
   }
 };
 
+export const fetchUser = async (userId) => {
+  try {
+    let user = await GetUser("_id", userId);
+    user.password = undefined;
+    if (!user) {
+      return {
+        status: 200,
+        payload: {
+          message: "User Not Found",
+          success: false,
+        },
+      };
+    }
+
+    return {
+      status: 200,
+      payload: {
+        message: "User Fetched Successfully",
+        payload: user,
+        success: true,
+      },
+    };
+  } catch (error) {
+    return {
+      status: 200,
+      payload: {
+        message: error.message,
+        success: false,
+      },
+    };
+  }
+};
+
 const GetUser = async (fieldName, value) => {
   const query = {};
   query[fieldName] = value;

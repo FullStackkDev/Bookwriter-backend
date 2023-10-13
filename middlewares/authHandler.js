@@ -13,6 +13,12 @@ const Protected = async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
       let { id } = jwt.decode(token, process.env.JWT_SECRET);
       let user = await User.findById(id).select("-password");
+      if (!user) {
+        res.status(200).json({
+          message: "Token Invalid/User Not Found",
+          success: false,
+        });
+      }
       req.user = user;
       next();
     } catch (error) {
