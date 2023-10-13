@@ -1,5 +1,9 @@
 import User from "../../models/userSchema.js";
-import { getUserValidationErrors } from "../../utils.js";
+import {
+  getUserValidationErrors,
+  emailRegex,
+  passwordRegex,
+} from "../../utils.js";
 
 export const create = async (userData) => {
   try {
@@ -226,6 +230,72 @@ export const fetchUser = async (userId) => {
       payload: {
         message: "User Fetched Successfully",
         payload: user,
+        success: true,
+      },
+    };
+  } catch (error) {
+    return {
+      status: 200,
+      payload: {
+        message: error.message,
+        success: false,
+      },
+    };
+  }
+};
+
+export const loginUser = async (userData) => {
+  try {
+    if (!emailRegex.test(userData.email)) {
+      return {
+        status: 200,
+        payload: {
+          message: "Invalid email address.",
+          success: false,
+        },
+      };
+    }
+    if (!passwordRegex.test(userData.password)) {
+      return {
+        status: 200,
+        payload: {
+          message: "Password must be at least 8 characters long.",
+          success: false,
+        },
+      };
+    }
+
+    //check if user already exist based on email
+    const user = await GetUser("email", userData.email);
+    if (!user) {
+      return {
+        status: 200,
+        payload: {
+          message: "User not found",
+          success: false,
+        },
+      };
+    }
+
+    if (!(await user.matchPassword(userData.password))) {
+      return {
+        status: 200,
+        payload: {
+          message: "Email or password is incorrect",
+          success: false,
+        },
+      };
+    }
+    user.password = undefined;
+
+    return {
+      status: 200,
+      payload: {
+        message: "User Signin Sucessfully",
+        payload: {
+          ...user._doc,
+          token: user.generateToken(),
+        },
         success: true,
       },
     };
