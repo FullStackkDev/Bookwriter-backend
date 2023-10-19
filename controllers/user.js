@@ -24,7 +24,7 @@ const getUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   const result = await update(req.params.id, req.body);
-  return res.status(result.status).json(result.payload);
+  return res.status(STATUS_CODE).json(result);
 };
 
 const deleteUser = async (req, res) => {

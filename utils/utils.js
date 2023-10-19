@@ -2,7 +2,10 @@ const getUserValidationErrors = (error) => {
   let validationErrors = {};
   if (error.code === 11000) {
     validationErrors["email"] = "Email is already in use";
-  } else {
+  } else if (
+    error.name === "ValidationError" &&
+    Object.keys(error.errors).length
+  ) {
     const { first_name, last_name, email, phone_no, password } = error.errors;
     if (first_name) {
       validationErrors["firstName"] = first_name.message;

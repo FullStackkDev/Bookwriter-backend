@@ -7,3 +7,4 @@ export const PASSWORD_8_CHAR_LONG =
 export const NOT_FOUND = "Not Found";
 export const FETCHED = "Fetched Successfully";
 export const DELETED = "Deleted Successfully";
+export const UPDATED = "Updated Successfully";

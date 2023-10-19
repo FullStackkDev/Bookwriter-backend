@@ -10,6 +10,7 @@ import {
   NOT_FOUND,
   FETCHED,
   DELETED,
+  UPDATED,
 } from "../utils/messages.js";
 
 export const create = async (userData) => {
@@ -43,73 +44,27 @@ export const create = async (userData) => {
 
 export const update = async (id, updatedData) => {
   try {
+    let payload = {};
     if (
       "current_password" in updatedData ||
       "updated_password" in updatedData
     ) {
-      const user = await User.findById(id);
-      if (!user) {
-        return {
-          status: 200,
-          payload: {
-            message: "User Not Found",
-            success: false,
-          },
-        };
-      }
-      if (!(await user.matchPassword(updatedData.current_password))) {
-        return {
-          status: 200,
-          payload: {
-            message: `Your current password is wrong.`,
-            success: false,
-          },
-        };
-      }
-      user.password = updatedData.updated_password;
-      await user.save();
-      return {
-        status: 200,
-        payload: {
-          message: "User Password Updated Successfully",
-          success: true,
-        },
-      };
+      payload = await updatePassword(id, updatedData);
+    } else {
+      payload = await updateUser(id, updatedData);
     }
 
-    const updatedUser = await UpdateUser(id, updatedData);
-    if (!updatedUser) {
-      return {
-        status: 200,
-        payload: {
-          message: "User Not Found",
-          success: false,
-        },
-      };
-    }
-    return {
-      status: 200,
-      payload: {
-        message: "User Updated Successfully",
-        payload: updatedUser,
-        success: true,
-      },
-    };
+    return payload;
   } catch (error) {
-    let ValidationErrors = {};
-    if (error.name === "ValidationError" && Object.keys(error.errors).length) {
-      ValidationErrors = getUserValidationErrors(error);
-    }
+    let validationErrors = getUserValidationErrors(error);
+
     return {
-      status: 200,
-      payload: {
-        message: {
-          error: Object.keys(ValidationErrors).length
-            ? ValidationErrors
-            : error.message,
-        },
-        success: false,
+      message: {
+        error: Object.keys(validationErrors).length
+          ? validationErrors
+          : error.message,
       },
+      success: false,
     };
   }
 };
@@ -275,6 +230,50 @@ const createSimpleUser = async (userData) => {
     payload = {
       message: `${SIGNUP_SUCCESS}`,
       payload: user,
+      success: true,
+    };
+  }
+
+  return payload;
+};
+
+const updatePassword = async (id, updatedData) => {
+  let payload = {};
+  const user = await User.findById(id);
+  if (!user) {
+    payload = {
+      message: `User ${NOT_FOUND}`,
+      success: false,
+    };
+  } else if (!(await user.matchPassword(updatedData.current_password))) {
+    payload = {
+      message: `Your current password is wrong.`,
+      success: false,
+    };
+  } else {
+    user.password = updatedData.updated_password;
+    await user.save();
+    payload = {
+      message: `User Password ${UPDATED}`,
+      success: true,
+    };
+  }
+
+  return payload;
+};
+
+const updateUser = async (id, updatedData) => {
+  let payload = {};
+  const updatedUser = await UpdateUser(id, updatedData);
+  if (!updatedUser) {
+    payload = {
+      message: `User ${NOT_FOUND}`,
+      success: false,
+    };
+  } else {
+    payload = {
+      message: `User ${UPDATED}`,
+      payload: updatedUser,
       success: true,
     };
   }
