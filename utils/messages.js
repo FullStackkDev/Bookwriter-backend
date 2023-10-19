@@ -6,3 +6,4 @@ export const PASSWORD_8_CHAR_LONG =
   "Password must be at least 8 characters long";
 export const NOT_FOUND = "Not Found";
 export const FETCHED = "Fetched Successfully";
+export const DELETED = "Deleted Successfully";

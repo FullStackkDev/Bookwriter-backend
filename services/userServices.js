@@ -9,6 +9,7 @@ import {
   PASSWORD_8_CHAR_LONG,
   NOT_FOUND,
   FETCHED,
+  DELETED,
 } from "../utils/messages.js";
 
 export const create = async (userData) => {
@@ -115,32 +116,26 @@ export const update = async (id, updatedData) => {
 
 export const remove = async (id) => {
   try {
+    let payload = {};
     const deletedUser = await User.findByIdAndDelete(id).select("-password");
     if (!deletedUser) {
-      return {
-        status: 200,
-        payload: {
-          message: "User Not Found",
-          success: false,
-        },
+      payload = {
+        message: `User ${NOT_FOUND}`,
+        success: false,
+      };
+    } else {
+      payload = {
+        message: `User ${DELETED}`,
+        payload: deletedUser,
+        success: true,
       };
     }
 
-    return {
-      status: 200,
-      payload: {
-        message: "User Deleted Successfully",
-        payload: deletedUser,
-        success: true,
-      },
-    };
+    return payload;
   } catch (error) {
     return {
-      status: 200,
-      payload: {
-        message: error.message,
-        success: false,
-      },
+      message: error.message,
+      success: false,
     };
   }
 };

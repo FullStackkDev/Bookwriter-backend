@@ -29,7 +29,7 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   const result = await remove(req.params.id);
-  return res.status(result.status).json(result.payload);
+  return res.status(STATUS_CODE).json(result);
 };
 
 export default {
