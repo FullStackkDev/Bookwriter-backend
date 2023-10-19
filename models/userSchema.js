@@ -4,6 +4,10 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import validator from "validator";
 import { NAME_REGEX, PHONE_REGEX } from "../utils/constants.js";
+import {
+  INVALID_EMAIL_ADDRESS,
+  PASSWORD_8_CHAR_LONG,
+} from "../utils/messages.js";
 
 const userSchema = mongoose.Schema(
   {
@@ -39,7 +43,7 @@ const userSchema = mongoose.Schema(
       lowercase: true, // Convert email to lowercase
       validate: {
         validator: validator.isEmail,
-        message: "Invalid email address",
+        message: `${INVALID_EMAIL_ADDRESS}`,
       },
     },
     phone_no: {
@@ -54,7 +58,7 @@ const userSchema = mongoose.Schema(
     },
     password: {
       type: String,
-      minLength: [8, "Password must be at least 8 characters long"],
+      minLength: [8, `${PASSWORD_8_CHAR_LONG}`],
     },
     third_party_user_id: {
       type: Number,

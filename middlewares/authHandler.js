@@ -2,6 +2,7 @@
 import User from "../models/userSchema.js";
 import jwt from "jsonwebtoken";
 import { STATUS_CODE } from "../utils/constants.js";
+import { NOT_FOUND } from "../utils/messages.js";
 
 const Protected = async (req, res, next) => {
   console.log("Enter in authentication file");
@@ -16,7 +17,7 @@ const Protected = async (req, res, next) => {
       let user = await User.findById(id).select("-password");
       if (!user) {
         return res.status(STATUS_CODE).json({
-          message: "Token Invalid/User Not Found",
+          message: `Token Invalid/User ${NOT_FOUND}`,
           success: false,
         });
       }

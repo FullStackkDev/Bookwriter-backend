@@ -1,7 +1,14 @@
 import User from "../models/userSchema.js";
 import { getUserValidationErrors } from "../utils/utils.js";
 import { EMAIL_REGEX, PASSWORD_REGEX } from "../utils/constants.js";
-import { EXIST, LOGIN_SUCCESS, SIGNUP_SUCCESS } from "../utils/messages.js";
+import {
+  EXIST,
+  LOGIN_SUCCESS,
+  SIGNUP_SUCCESS,
+  INVALID_EMAIL_ADDRESS,
+  PASSWORD_8_CHAR_LONG,
+  NOT_FOUND,
+} from "../utils/messages.js";
 
 export const create = async (userData) => {
   try {
@@ -172,66 +179,47 @@ export const fetchUser = async (userId) => {
 
 export const loginUser = async (userData) => {
   try {
+    let payload = {};
     if (!EMAIL_REGEX.test(userData.email)) {
-      return {
-        status: 200,
-        payload: {
-          message: "Invalid email address.",
-          success: false,
-        },
+      payload = {
+        message: `${INVALID_EMAIL_ADDRESS}`,
+        success: false,
       };
-    }
-    if (!PASSWORD_REGEX.test(userData.password)) {
-      return {
-        status: 200,
-        payload: {
-          message: "Password must be at least 8 characters long.",
-          success: false,
-        },
+    } else if (!PASSWORD_REGEX.test(userData.password)) {
+      payload = {
+        message: `${PASSWORD_8_CHAR_LONG}`,
+        success: false,
       };
-    }
-
-    //check if user already exist based on email
-    const user = await GetUser("email", userData.email);
-    if (!user) {
-      return {
-        status: 200,
-        payload: {
-          message: "User not found",
+    } else {
+      //check if user already exist based on email
+      const user = await GetUser("email", userData.email);
+      if (!user) {
+        payload = {
+          message: `User ${NOT_FOUND}`,
           success: false,
-        },
-      };
-    }
-
-    if (!(await user.matchPassword(userData.password))) {
-      return {
-        status: 200,
-        payload: {
+        };
+      } else if (!(await user.matchPassword(userData.password))) {
+        payload = {
           message: "Email or password is incorrect",
           success: false,
-        },
-      };
+        };
+      } else {
+        user.password = undefined;
+        payload = {
+          message: `${LOGIN_SUCCESS}`,
+          payload: {
+            ...user._doc,
+            token: user.generateToken(),
+          },
+          success: true,
+        };
+      }
     }
-    user.password = undefined;
-
-    return {
-      status: 200,
-      payload: {
-        message: `${LOGIN_SUCCESS}`,
-        payload: {
-          ...user._doc,
-          token: user.generateToken(),
-        },
-        success: true,
-      },
-    };
+    return payload;
   } catch (error) {
     return {
-      status: 200,
-      payload: {
-        message: error.message,
-        success: false,
-      },
+      message: error.message,
+      success: false,
     };
   }
 };
