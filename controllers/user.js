@@ -4,7 +4,8 @@ import {
   remove,
   fetchUser,
   loginUser,
-} from "./helper/userHelper.js";
+} from "../services/userServices.js";
+import { STATUS_CODE } from "../utils/constants.js";
 
 const login = async (req, res) => {
   const result = await loginUser(req.body);
@@ -13,7 +14,7 @@ const login = async (req, res) => {
 
 const createUser = async (req, res) => {
   const result = await create(req.body);
-  return res.status(result.status).json(result.payload);
+  return res.status(STATUS_CODE).json(result);
 };
 
 const getUser = async (req, res) => {

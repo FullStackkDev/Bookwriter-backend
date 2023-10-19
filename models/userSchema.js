@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import validator from "validator";
-import { nameRegex, phoneRegex } from "../utils.js";
+import { NAME_REGEX, PHONE_REGEX } from "../utils/constants.js";
 
 const userSchema = mongoose.Schema(
   {
@@ -11,24 +11,24 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, "First name is required"],
       trim: true,
-      minLength: [3, "First name must have at least 3 characters."],
+      minLength: [3, "First name must have at least 3 characters"],
       validate: {
         validator: (value) => {
-          return nameRegex.test(value);
+          return NAME_REGEX.test(value);
         },
-        message: "First name does not include numbers.",
+        message: "First name does not start with a number",
       },
     },
     last_name: {
       type: String,
       required: [true, "Last name is required"],
       trim: true,
-      minLength: [3, "Last name must have at least 3 characters."],
+      minLength: [3, "Last name must have at least 3 characters"],
       validate: {
         validator: (value) => {
-          return nameRegex.test(value);
+          return NAME_REGEX.test(value);
         },
-        message: "Last name does not include numbers.",
+        message: "Last name does not include numbers",
       },
     },
     email: {
@@ -39,14 +39,14 @@ const userSchema = mongoose.Schema(
       lowercase: true, // Convert email to lowercase
       validate: {
         validator: validator.isEmail,
-        message: "Invalid email address.",
+        message: "Invalid email address",
       },
     },
     phone_no: {
       type: String,
       validate: {
         validator: (value) => {
-          return phoneRegex.test(value);
+          return PHONE_REGEX.test(value);
         },
         message:
           "Invalid phone number format. Please use the format: +xx-xxxxxxxxxx",
@@ -54,7 +54,7 @@ const userSchema = mongoose.Schema(
     },
     password: {
       type: String,
-      minLength: [8, "Password must be at least 8 characters long."],
+      minLength: [8, "Password must be at least 8 characters long"],
     },
     third_party_user_id: {
       type: Number,
