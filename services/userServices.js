@@ -1,107 +1,33 @@
-import User from "../../models/userSchema.js";
-import {
-  getUserValidationErrors,
-  emailRegex,
-  passwordRegex,
-} from "../../utils.js";
+import User from "../models/userSchema.js";
+import { getUserValidationErrors } from "../utils/utils.js";
+import { EMAIL_REGEX, PASSWORD_REGEX } from "../utils/constants.js";
+import { EXIST, LOGIN_SUCCESS, SIGNUP_SUCCESS } from "../utils/messages.js";
 
 export const create = async (userData) => {
   try {
-    //For third party user registering
+    let payload = {};
     if ("third_party_user_id" in userData || "third_party_type" in userData) {
-      if (typeof userData.third_party_user_id !== "number") {
-        return {
-          status: 200,
-          payload: {
-            message: "ID must be a number",
-            success: false,
-          },
-        };
-      }
-
-      if (!userData.third_party_type) {
-        return {
-          status: 200,
-          payload: {
-            message: "Third party type is missing",
-            success: false,
-          },
-        };
-      }
-
-      //check if user already exist based on third_party_user_id
-      const userExist = await GetUser(
-        "third_party_user_id",
-        userData.third_party_user_id
-      );
-      if (userExist) {
-        return {
-          status: 200,
-          payload: {
-            message: "User Already Exist",
-            payload: {
-              _id: userExist._id,
-              first_name: userExist.first_name,
-              last_name: userExist.last_name,
-              email: userExist.email,
-              third_party_user_id: userExist.third_party_user_id,
-              third_party_type: userExist.third_party_type,
-              token: userExist.generateToken(),
-            },
-            success: true,
-          },
-        };
-      }
-      const user = await AddUser(userData);
-
-      return {
-        status: 200,
-        payload: {
-          message: "User Signin Successfully",
-          payload: { ...user._doc, token: user.generateToken() },
-          success: true,
-        },
-      };
+      //For thir party user registering
+      payload = await createThirdpartyUser(userData);
+    } else {
+      //For simple user registering
+      payload = await createSimpleUser(userData);
     }
-
-    //For simple user registering
-    //check if user already exist based on email
-    const userExist = await GetUser("email", userData.email);
-    if (userExist) {
-      return {
-        status: 200,
-        payload: {
-          message: "User Already Exist",
-          success: false,
-        },
-      };
-    }
-    let user = await AddUser(userData);
-    user.password = undefined;
-
-    return {
-      status: 200,
-      payload: {
-        message: "User Registered Successfully",
-        payload: user,
-        success: true,
-      },
-    };
+    return payload;
   } catch (error) {
-    let ValidationErrors = {};
+    let validationErrors = {};
     if (error.name === "ValidationError" && Object.keys(error.errors).length) {
-      ValidationErrors = getUserValidationErrors(error);
+      validationErrors = getUserValidationErrors(error);
+    } else if (error.code === 11000) {
+      validationErrors = getUserValidationErrors(error);
     }
     return {
-      status: 200,
-      payload: {
-        message: {
-          error: Object.keys(ValidationErrors).length
-            ? ValidationErrors
-            : error.message,
-        },
-        success: false,
+      message: {
+        error: Object.keys(validationErrors).length
+          ? validationErrors
+          : error.message,
       },
+      success: false,
     };
   }
 };
@@ -246,7 +172,7 @@ export const fetchUser = async (userId) => {
 
 export const loginUser = async (userData) => {
   try {
-    if (!emailRegex.test(userData.email)) {
+    if (!EMAIL_REGEX.test(userData.email)) {
       return {
         status: 200,
         payload: {
@@ -255,7 +181,7 @@ export const loginUser = async (userData) => {
         },
       };
     }
-    if (!passwordRegex.test(userData.password)) {
+    if (!PASSWORD_REGEX.test(userData.password)) {
       return {
         status: 200,
         payload: {
@@ -291,7 +217,7 @@ export const loginUser = async (userData) => {
     return {
       status: 200,
       payload: {
-        message: "User Signin Sucessfully",
+        message: `${LOGIN_SUCCESS}`,
         payload: {
           ...user._doc,
           token: user.generateToken(),
@@ -308,6 +234,74 @@ export const loginUser = async (userData) => {
       },
     };
   }
+};
+
+const createThirdpartyUser = async (userData) => {
+  let payload = {};
+
+  if (typeof userData.third_party_user_id !== "number") {
+    payload = {
+      message: "User ID must be a number",
+      success: false,
+    };
+  } else if (!userData.third_party_type) {
+    payload = {
+      message: "Third party type is missing",
+      success: false,
+    };
+  } else {
+    const user = await GetUser(
+      "third_party_user_id",
+      userData.third_party_user_id
+    );
+
+    if (user) {
+      payload = {
+        message: `User ${EXIST}`,
+        payload: {
+          _id: user._id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email: user.email,
+          third_party_user_id: user.third_party_user_id,
+          third_party_type: user.third_party_type,
+          token: user.generateToken(),
+        },
+        success: true,
+      };
+    } else {
+      const user = await AddUser(userData);
+      payload = {
+        message: `${LOGIN_SUCCESS}`,
+        payload: { ...user._doc, token: user.generateToken() },
+        success: true,
+      };
+    }
+  }
+
+  return payload;
+};
+
+const createSimpleUser = async (userData) => {
+  let payload = {};
+
+  const user = await GetUser("email", userData.email);
+  if (user) {
+    payload = {
+      message: `User ${EXIST}`,
+      success: false,
+    };
+  } else {
+    let user = await AddUser(userData);
+    user.password = undefined;
+    payload = {
+      message: `${SIGNUP_SUCCESS}`,
+      payload: user,
+      success: true,
+    };
+  }
+
+  return payload;
 };
 
 const GetUser = async (fieldName, value) => {
