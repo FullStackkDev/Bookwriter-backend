@@ -1,6 +1,7 @@
 // validate for route protection
 import User from "../models/userSchema.js";
 import jwt from "jsonwebtoken";
+import { STATUS_CODE } from "../utils/constants.js";
 
 const Protected = async (req, res, next) => {
   console.log("Enter in authentication file");
@@ -14,7 +15,7 @@ const Protected = async (req, res, next) => {
       let { id } = jwt.decode(token, process.env.JWT_SECRET);
       let user = await User.findById(id).select("-password");
       if (!user) {
-        res.status(200).json({
+        return res.status(STATUS_CODE).json({
           message: "Token Invalid/User Not Found",
           success: false,
         });
@@ -22,13 +23,13 @@ const Protected = async (req, res, next) => {
       req.user = user;
       next();
     } catch (error) {
-      return res.status(200).json({
+      return res.status(STATUS_CODE).json({
         message: error.message,
         success: false,
       });
     }
   } else {
-    return res.status(200).json({
+    return res.status(STATUS_CODE).json({
       message: "Unauthorized",
       success: false,
     });
