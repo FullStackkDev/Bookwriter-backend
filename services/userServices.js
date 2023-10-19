@@ -25,12 +25,8 @@ export const create = async (userData) => {
     }
     return payload;
   } catch (error) {
-    let validationErrors = {};
-    if (error.name === "ValidationError" && Object.keys(error.errors).length) {
-      validationErrors = getUserValidationErrors(error);
-    } else if (error.code === 11000) {
-      validationErrors = getUserValidationErrors(error);
-    }
+    let validationErrors = getUserValidationErrors(error);
+
     return {
       message: {
         error: Object.keys(validationErrors).length
