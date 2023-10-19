@@ -8,6 +8,7 @@ import {
   INVALID_EMAIL_ADDRESS,
   PASSWORD_8_CHAR_LONG,
   NOT_FOUND,
+  FETCHED,
 } from "../utils/messages.js";
 
 export const create = async (userData) => {
@@ -146,33 +147,27 @@ export const remove = async (id) => {
 
 export const fetchUser = async (userId) => {
   try {
+    let payload = {};
     let user = await GetUser("_id", userId);
     user.password = undefined;
     if (!user) {
-      return {
-        status: 200,
-        payload: {
-          message: "User Not Found",
-          success: false,
-        },
+      payload = {
+        message: `User ${NOT_FOUND}`,
+        success: false,
+      };
+    } else {
+      payload = {
+        message: `User ${FETCHED}`,
+        payload: user,
+        success: true,
       };
     }
 
-    return {
-      status: 200,
-      payload: {
-        message: "User Fetched Successfully",
-        payload: user,
-        success: true,
-      },
-    };
+    return payload;
   } catch (error) {
     return {
-      status: 200,
-      payload: {
-        message: error.message,
-        success: false,
-      },
+      message: error.message,
+      success: false,
     };
   }
 };

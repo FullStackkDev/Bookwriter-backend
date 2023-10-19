@@ -19,7 +19,7 @@ const createUser = async (req, res) => {
 
 const getUser = async (req, res) => {
   const result = await fetchUser(req.user._id);
-  return res.status(result.status).json(result.payload);
+  return res.status(STATUS_CODE).json(result);
 };
 
 const updateUser = async (req, res) => {
