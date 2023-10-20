@@ -168,7 +168,7 @@ export const loginUser = async (userData) => {
 const createThirdpartyUser = async (userData) => {
   let payload = {};
 
-  if (typeof userData.third_party_user_id !== "number") {
+  if (!userData.third_party_user_id) {
     payload = {
       message: "User ID must be a number",
       success: false,

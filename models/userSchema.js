@@ -61,7 +61,7 @@ const userSchema = mongoose.Schema(
       minLength: [8, `${PASSWORD_8_CHAR_LONG}`],
     },
     third_party_user_id: {
-      type: Number,
+      type: String,
     },
     third_party_type: {
       type: String,
