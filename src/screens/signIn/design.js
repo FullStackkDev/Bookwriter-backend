@@ -25,11 +25,16 @@ function Design({ userData, setUserData, errors, handleSubmit }) {
     <Container component="main" maxWidth="sm">
       <Box sx={boxContainer}>
         <BookLogo />
-        <Typography component="h1" variant="h5" sx={title}>
+        <Typography
+          component="h1"
+          variant="h5"
+          sx={title}
+          data-testid="heading"
+        >
           Book Writer
         </Typography>
 
-        <Typography component="h1" variant="h5">
+        <Typography component="h1" variant="h5" data-testid="title">
           Sign In
         </Typography>
         <Grid container justifyContent={"center"}>
@@ -59,9 +64,10 @@ function Design({ userData, setUserData, errors, handleSubmit }) {
               handleChange(e, userData, setUserData);
             }}
             autoFocus
-            error={errors.email ? true : false}
-            helperText={errors.email}
-            value={userData.email}
+            error={errors?.email ? true : false}
+            helperText={errors?.email}
+            value={userData?.email}
+            data-testid="email"
           />
           <TextField
             margin="normal"
@@ -74,11 +80,18 @@ function Design({ userData, setUserData, errors, handleSubmit }) {
             onChange={(e) => {
               handleChange(e, userData, setUserData);
             }}
-            error={errors.password ? true : false}
-            helperText={errors.password}
-            value={userData.password}
+            error={errors?.password ? true : false}
+            helperText={errors?.password}
+            value={userData?.password}
+            data-testid="password"
           />
-          <Button type="submit" fullWidth variant="contained" sx={button}>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={button}
+            data-testid="button"
+          >
             Sign In
           </Button>
           <Grid container justifyContent="center">

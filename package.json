@@ -36,7 +36,7 @@
   },
   "browserslist": {
     "production": [
-      ">0.2%",
+      ">0.25%",
       "not dead",
       "not op_mini all"
     ],
@@ -44,6 +44,19 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.2",
+    "@babel/preset-env": "^7.23.2",
+    "babel-jest": "^29.7.0"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.svg$": "<rootDir>/svgTransform.js"
+   },
+    "transformIgnorePatterns": [
+      "node_modules/(?!axios)/"
     ]
   }
 }
