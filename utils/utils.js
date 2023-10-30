@@ -26,4 +26,22 @@ const getUserValidationErrors = (error) => {
 
   return validationErrors;
 };
-export { getUserValidationErrors };
+
+const getBookValidationErrors = (error) => {
+  let validationErrors = {};
+  if (error.name === "ValidationError" && Object.keys(error.errors).length) {
+    const { title, image, description } = error.errors;
+    if (title) {
+      validationErrors["title"] = title.message;
+    }
+    if (image) {
+      validationErrors["image"] = image.message;
+    }
+    if (description) {
+      validationErrors["description"] = description.message;
+    }
+  }
+
+  return validationErrors;
+};
+export { getUserValidationErrors, getBookValidationErrors };
