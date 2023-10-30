@@ -1,17 +1,10 @@
 import Book from "../models/bookSchema.js";
+import { fetchBook } from "../services/bookServices.js";
+import { STATUS_CODE } from "../utils/constants.js";
 
 const getBook = async (req, res) => {
-  try {
-    const books = await Book.find();
-
-    return res.status(200).json({
-      message: "Book Fetched Successfully",
-      payload: books,
-      success: true,
-    });
-  } catch (error) {
-    res.status(200).json({ message: error.message, success: false });
-  }
+  const result = await fetchBook();
+  return res.status(STATUS_CODE).json(result);
 };
 
 const createBook = async (req, res) => {
