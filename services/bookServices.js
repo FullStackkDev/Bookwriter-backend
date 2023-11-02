@@ -1,6 +1,6 @@
 import Book from "../models/bookSchema.js";
 import { getBookValidationErrors } from "../utils/utils.js";
-import { FETCHED, CREATED } from "../utils/messages.js";
+import { FETCHED, CREATED, UPDATED, NOT_FOUND } from "../utils/messages.js";
 
 export const fetchBook = async () => {
   try {
@@ -29,6 +29,41 @@ export const create = async (bookData) => {
       payload: book,
       success: true,
     };
+
+    return payload;
+  } catch (error) {
+    let validationErrors = getBookValidationErrors(error);
+    return {
+      message: {
+        error: Object.keys(validationErrors).length
+          ? validationErrors
+          : error.message,
+      },
+      success: false,
+    };
+  }
+};
+
+export const update = async (id, updatedData) => {
+  try {
+    let payload = {};
+
+    const updatedBook = await Book.findByIdAndUpdate(id, updatedData, {
+      new: true,
+      runValidators: true,
+    });
+    if (!updatedBook) {
+      payload = {
+        message: `Book ${NOT_FOUND}`,
+        success: false,
+      };
+    } else {
+      payload = {
+        message: `Book ${UPDATED}`,
+        payload: updatedBook,
+        success: true,
+      };
+    }
 
     return payload;
   } catch (error) {
