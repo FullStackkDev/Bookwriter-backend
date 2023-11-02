@@ -1,6 +1,12 @@
 import Book from "../models/bookSchema.js";
 import { getBookValidationErrors } from "../utils/utils.js";
-import { FETCHED, CREATED, UPDATED, NOT_FOUND } from "../utils/messages.js";
+import {
+  FETCHED,
+  CREATED,
+  UPDATED,
+  NOT_FOUND,
+  DELETED,
+} from "../utils/messages.js";
 
 export const fetchBook = async () => {
   try {
@@ -74,6 +80,33 @@ export const update = async (id, updatedData) => {
           ? validationErrors
           : error.message,
       },
+      success: false,
+    };
+  }
+};
+
+export const remove = async (id) => {
+  try {
+    let payload = {};
+
+    const deletedBook = await Book.findByIdAndDelete(id);
+    if (!deletedBook) {
+      payload = {
+        message: `Book ${NOT_FOUND}`,
+        success: false,
+      };
+    } else {
+      payload = {
+        message: `Book ${DELETED}`,
+        payload: deletedBook,
+        success: true,
+      };
+    }
+
+    return payload;
+  } catch (error) {
+    return {
+      message: error.message,
       success: false,
     };
   }

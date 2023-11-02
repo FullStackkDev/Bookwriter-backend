@@ -1,5 +1,4 @@
-import Book from "../models/bookSchema.js";
-import { fetchBook, create, update } from "../services/bookServices.js";
+import { fetchBook, create, update, remove } from "../services/bookServices.js";
 import { STATUS_CODE } from "../utils/constants.js";
 
 const getBook = async (req, res) => {
@@ -18,25 +17,8 @@ const updateBook = async (req, res) => {
 };
 
 const deleteBook = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const deletedBook = await Book.findByIdAndDelete(id);
-    if (!deletedBook) {
-      return res.status(200).json({
-        message: "Book Not Found",
-        success: false,
-      });
-    }
-
-    return res.status(200).json({
-      message: "Book Deleted Successfully",
-      payload: deletedBook,
-      success: true,
-    });
-  } catch (error) {
-    res.status(200).json({ message: error.message, success: false });
-  }
+  const result = await remove(req.params.id);
+  return res.status(STATUS_CODE).json(result);
 };
 
 export default {
