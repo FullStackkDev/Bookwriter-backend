@@ -2,7 +2,7 @@ import {
   createWriter,
   fetchWriter,
   removeWriter,
-} from "../services/writerServices.js";
+} from "../services/writerRoleServices.js";
 import { STATUS_CODE } from "../utils/constants.js";
 
 const createWriterRole = async (req, res) => {
