@@ -5,6 +5,7 @@ import cors from "cors";
 import { connectDB } from "./db/config.js";
 import bookRouter from "./routes/book.js";
 import userRouter from "./routes/user.js";
+import writerRoleRouter from "./routes/writerRole.js";
 import publicRouter from "./routes/public.js";
 import Protected from "./middlewares/authHandler.js";
 
@@ -21,6 +22,7 @@ app.use(publicRouter);
 app.use(Protected);
 app.use(userRouter);
 app.use(bookRouter);
+app.use(writerRoleRouter);
 
 app.listen(port, () => {
   console.log(`server is running at port ${port}`);
