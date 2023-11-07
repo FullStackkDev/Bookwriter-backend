@@ -44,4 +44,27 @@ const getBookValidationErrors = (error) => {
 
   return validationErrors;
 };
-export { getUserValidationErrors, getBookValidationErrors };
+
+const getWriterRoleValidationErrors = (error) => {
+  let validationErrors = {};
+  if (error.name === "ValidationError" && Object.keys(error.errors).length) {
+    const { book_id, user_id, role } = error.errors;
+    if (book_id) {
+      validationErrors["book_id"] = book_id.message;
+    }
+    if (user_id) {
+      validationErrors["user_id"] = user_id.message;
+    }
+    if (role) {
+      validationErrors["role"] = role.message;
+    }
+  }
+
+  return validationErrors;
+};
+
+export {
+  getUserValidationErrors,
+  getBookValidationErrors,
+  getWriterRoleValidationErrors,
+};

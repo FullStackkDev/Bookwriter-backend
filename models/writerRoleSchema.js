@@ -5,16 +5,16 @@ const writerRoleSchema = mongoose.Schema(
     book_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "book",
-      required: true,
+      required: [true, "book_id is required"],
     },
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "user",
-      required: true,
+      required: [true, "user_id is required"],
     },
     role: {
       type: String,
-      required: true,
+      required: [true, "role is required"],
     },
   },
   {
