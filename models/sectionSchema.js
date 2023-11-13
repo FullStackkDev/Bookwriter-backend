@@ -5,7 +5,7 @@ const sectionSchema = mongoose.Schema(
     book_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "book",
-      required: true,
+      required: [true, "book_id is required"],
     },
     parent_section_id: {
       type: mongoose.Schema.Types.ObjectId,
@@ -14,11 +14,11 @@ const sectionSchema = mongoose.Schema(
     },
     title: {
       type: String,
-      required: true,
+      required: [true, "Title is required"],
     },
     content: {
       type: String,
-      required: true,
+      required: [true, "Content is required"],
     },
   },
   {
