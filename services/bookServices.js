@@ -1,5 +1,6 @@
 import Book from "../models/bookSchema.js";
 import { getBookValidationErrors } from "../utils/utils.js";
+import { createWriter, removeWritersByBookId } from "./writerRoleServices.js";
 import {
   FETCHED,
   CREATED,
@@ -25,15 +26,26 @@ export const fetchBook = async () => {
   }
 };
 
-export const create = async (bookData) => {
+export const create = async (bookData, userId) => {
   try {
     let payload = {};
     const book = await Book.create(bookData);
 
+    const writerPayloadData = {
+      book_id: book._id,
+      user_id: userId,
+      role: "author",
+    };
+
+    const writerRole = await createWriter(writerPayloadData);
+
     payload = {
-      message: `Book ${CREATED}`,
-      payload: book,
-      success: true,
+      bookPayload: {
+        message: `Book ${CREATED}`,
+        payload: book,
+        success: true,
+      },
+      writerRolePayload: writerRole,
     };
 
     return payload;
@@ -90,16 +102,24 @@ export const remove = async (id) => {
     let payload = {};
 
     const deletedBook = await Book.findByIdAndDelete(id);
-    if (!deletedBook) {
+    const deleteWriterRole = await removeWritersByBookId(id);
+
+    if (!deletedBook && !deleteWriterRole.success) {
       payload = {
-        message: `Book ${NOT_FOUND}`,
-        success: false,
+        bookPayload: {
+          message: `Book ${NOT_FOUND}`,
+          success: false,
+        },
+        writerRolePayload: deleteWriterRole,
       };
     } else {
       payload = {
-        message: `Book ${DELETED}`,
-        payload: deletedBook,
-        success: true,
+        bookPayload: {
+          message: `Book ${DELETED}`,
+          payload: deletedBook,
+          success: true,
+        },
+        writerRolePayload: deleteWriterRole,
       };
     }
 

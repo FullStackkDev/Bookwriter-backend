@@ -7,7 +7,7 @@ const getBook = async (req, res) => {
 };
 
 const createBook = async (req, res) => {
-  const result = await create(req.body);
+  const result = await create(req.body, req?.user?._id);
   return res.status(STATUS_CODE).json(result);
 };
 
